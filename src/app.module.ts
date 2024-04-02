@@ -6,7 +6,6 @@ import * as Joi from 'joi';
 
 @Module({
   imports: [
-    PostModule,
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         POSTGRES_HOST: Joi.string().required(),
@@ -17,7 +16,8 @@ import * as Joi from 'joi';
         PORT: Joi.number(),
       }),
     }),
-    DatabaseModule
+    DatabaseModule,
+    PostModule,
   ],
   controllers: [],
   providers: [],

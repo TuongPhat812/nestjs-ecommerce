@@ -3,7 +3,7 @@ import PostsService from './post.service';
 import { CreatePostDto, UpdatePostDto } from './dtos';
 
 @Controller('posts')
-export default class PostsController {
+export default class PostController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
