@@ -19,6 +19,11 @@ export class UserService {
     throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
   }
 
+  async checkUserExistedByEmail(email: string) {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    return !!user;
+  }
+
   async create(userData: CreateUserDto) {
     const newUser = await this.usersRepository.create(userData);
     await this.usersRepository.save(newUser);

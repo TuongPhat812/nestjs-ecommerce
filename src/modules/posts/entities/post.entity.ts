@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'posts' })
+@Entity({ name: 'post' })
 class PostEntity {
   @PrimaryGeneratedColumn()
   public id: number;
@@ -10,6 +10,9 @@ class PostEntity {
 
   @Column()
   public content: string;
+
+  @Column({ nullable: true })
+  public category?: string;
 }
 
 export { PostEntity };

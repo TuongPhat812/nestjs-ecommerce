@@ -5,6 +5,8 @@ import { DatabaseModule } from './modules/databases/database.module';
 import * as Joi from 'joi';
 import { AuthenticationModule } from './modules/authentications/authentication.module';
 import { UserModule } from './modules/users/user.module';
+import { APP_FILTER } from '@nestjs/core';
+import { GlobalExceptionFilter } from './shared/commons/exception-filters/global-exception.filter';
 
 @Module({
   imports: [
@@ -26,6 +28,11 @@ import { UserModule } from './modules/users/user.module';
     PostModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}
