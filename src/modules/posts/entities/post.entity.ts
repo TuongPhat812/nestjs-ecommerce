@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../../users/entities';
-import { CategoryEntity } from 'src/modules/categories/entities';
+import { CategoryEntity } from '../../categories/entities';
 
 @Entity({ name: 'post' })
 class PostEntity {

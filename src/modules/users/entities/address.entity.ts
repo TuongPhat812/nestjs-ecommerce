@@ -16,7 +16,7 @@ class AddressEntity {
   public country: string;
 
   @OneToOne(() => UserEntity, (user: UserEntity) => user.address)
-  public user: UserEntity;
+  public user?: UserEntity;
 }
 
 export { AddressEntity };

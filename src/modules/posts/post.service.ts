@@ -1,32 +1,45 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto, UpdatePostDto } from './dtos';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { PostEntity } from './entities/post.entity';
 import { UserEntity } from '../users/entities/user.entity';
+import PostSearchService from './post-search.service';
 
 @Injectable()
 export default class PostService {
   constructor(
     @InjectRepository(PostEntity)
-    private postsRepository: Repository<PostEntity>,
+    private postRepository: Repository<PostEntity>,
+    private postSearchService: PostSearchService,
   ) {}
 
   async getAllPosts() {
-    return await this.postsRepository.find({ relations: { author: true } });
+    return await this.postRepository.find({ relations: { author: true } });
   }
 
   async getPostById(id: number) {
-    const post = await this.postsRepository.findOne({ where: { id }, relations: { author: true } });
+    const post = await this.postRepository.findOne({ where: { id }, relations: { author: true } });
     if (post) {
       return post;
     }
     throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
   }
 
+  async searchForPosts(text: string) {
+    const results = await this.postSearchService.search(text);
+    const ids = results.map((result) => result.id);
+    if (!ids.length) {
+      return [];
+    }
+    return this.postRepository.find({
+      where: { id: In(ids) },
+    });
+  }
+
   async updatePost(id: number, post: UpdatePostDto) {
-    await this.postsRepository.update(id, post);
-    const updatedPost = await this.postsRepository.findOne({ where: { id }, relations: { author: true } });
+    await this.postRepository.update(id, post);
+    const updatedPost = await this.postRepository.findOne({ where: { id }, relations: { author: true } });
     if (updatedPost) {
       return updatedPost;
     }
@@ -34,13 +47,14 @@ export default class PostService {
   }
 
   async createPost(post: CreatePostDto, author: UserEntity) {
-    const newPost = await this.postsRepository.create({ ...post, author });
-    await this.postsRepository.save(newPost);
+    const newPost = await this.postRepository.create({ ...post, author });
+    await this.postRepository.save(newPost);
+    this.postSearchService.indexPost(newPost);
     return newPost;
   }
 
   async deletePost(id: number) {
-    const deleteResponse = await this.postsRepository.delete(id);
+    const deleteResponse = await this.postRepository.delete(id);
     if (!deleteResponse.affected) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }

@@ -7,6 +7,7 @@ import { AuthenticationModule } from './modules/authentications/authentication.m
 import { UserModule } from './modules/users/user.module';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './shared/commons/exception-filters/global-exception.filter';
+import { FileModule } from './modules/files/file.module';
 
 @Module({
   imports: [
@@ -20,12 +21,17 @@ import { GlobalExceptionFilter } from './shared/commons/exception-filters/global
         PORT: Joi.number(),
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.string().required(),
+        AWS_REGION: Joi.string().required(),
+        AWS_ACCESS_KEY_ID: Joi.string().required(),
+        AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+        AWS_PUBLIC_BUCKET_NAME: Joi.string().required(),
       }),
     }),
     DatabaseModule,
     UserModule,
     AuthenticationModule,
     PostModule,
+    FileModule
   ],
   controllers: [],
   providers: [

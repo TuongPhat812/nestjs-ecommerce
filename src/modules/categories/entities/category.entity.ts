@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { PostEntity } from 'src/modules/posts/entities';
+import { PostEntity } from '../../posts/entities';
 
 @Entity({ name: 'category' })
 class CategoryEntity {
