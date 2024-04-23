@@ -1,16 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import PostsService from './post.service';
 import { CreatePostDto, UpdatePostDto } from './dtos';
-import { JwtAuthenticationGuard } from '../authentications/guards';
+import { JwtAccessTokenAuthenticationGuard } from '../authentications/guards';
 import { RequestWithUser } from '../authentications/types/request-with-user.type';
+import { PaginationParams } from './types/pagination-params.type';
 
 @Controller('posts')
+@UseInterceptors(ClassSerializerInterceptor)
 export default class PostController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAllPosts() {
-    return this.postsService.getAllPosts();
+  async getPosts(@Query('search') search: string, @Query() { offset, limit, startId }: PaginationParams) {
+    if (search) {
+      return this.postsService.searchForPosts(search, offset, limit, startId);
+    }
+    return this.postsService.getAllPosts(offset, limit, startId);
   }
 
   @Get(':id')
@@ -19,7 +24,7 @@ export default class PostController {
   }
 
   @Post()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAccessTokenAuthenticationGuard)
   async createPost(@Req() request: RequestWithUser, @Body() post: CreatePostDto) {
     return this.postsService.createPost(post, request.user);
   }
