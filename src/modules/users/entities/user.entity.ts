@@ -38,6 +38,12 @@ class UserEntity {
 
   @OneToMany(() => PrivateFileEntity, (file: PrivateFileEntity) => file.owner)
   public files?: PrivateFileEntity[];
+
+  @Column({
+    nullable: true
+  })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 }
 
 export { UserEntity };

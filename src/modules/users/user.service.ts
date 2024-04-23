@@ -1,21 +1,23 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserWithEmailExistedException, UserWithEmailNotExistedException, UserWithIdNotExistedException } from './exceptions';
 import { FileService } from '../files/file.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private usersRepository: Repository<UserEntity>,
+    private userRepository: Repository<UserEntity>,
     private readonly fileService: FileService,
+    private connection: DataSource,
   ) {}
 
   async getByEmail(email: string) {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
       throw new UserWithEmailNotExistedException(email);
     }
@@ -23,7 +25,7 @@ export class UserService {
   }
 
   async checkUserExistedByEmail(email: string) {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
     return !!user;
   }
 
@@ -32,13 +34,13 @@ export class UserService {
     if (isUserExisted) {
       throw new UserWithEmailExistedException(userData.email);
     }
-    const newUser = await this.usersRepository.create(userData);
-    await this.usersRepository.save(newUser);
+    const newUser = await this.userRepository.create(userData);
+    await this.userRepository.save(newUser);
     return newUser;
   }
 
   async getById(id: number) {
-    const user = await this.usersRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new UserWithIdNotExistedException(id.toString());
     }
@@ -48,14 +50,14 @@ export class UserService {
   async addAvatar(userId: number, imageBuffer: Buffer, filename: string) {
     const user = await this.getById(userId);
     if (user.avatar) {
-      await this.usersRepository.update(userId, {
+      await this.userRepository.update(userId, {
         ...user,
         avatar: null,
       });
       await this.fileService.deletePublicFile(user.avatar.id);
     }
     const avatar = await this.fileService.uploadPublicFile(imageBuffer, filename);
-    await this.usersRepository.update(userId, {
+    await this.userRepository.update(userId, {
       ...user,
       avatar,
     });
@@ -63,14 +65,27 @@ export class UserService {
   }
 
   async deleteAvatar(userId: number) {
+    const queryRunner = this.connection.createQueryRunner();
+
     const user = await this.getById(userId);
     const fileId = user.avatar?.id;
     if (fileId) {
-      await this.usersRepository.update(userId, {
-        ...user,
-        avatar: null,
-      });
-      await this.fileService.deletePublicFile(fileId);
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        await queryRunner.manager.update(UserEntity, userId, {
+          ...user,
+          avatar: null,
+        });
+        // await this.fileService.deletePublicFile(fileId);
+        await queryRunner.commitTransaction();
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+        throw new InternalServerErrorException();
+      } finally {
+        await queryRunner.release();
+      }
     }
   }
 
@@ -87,7 +102,7 @@ export class UserService {
   }
 
   async getAllPrivateFiles(userId: number) {
-    const userWithFiles = await this.usersRepository.findOne({
+    const userWithFiles = await this.userRepository.findOne({
       where: { id: userId },
       relations: { files: true },
     });
@@ -103,5 +118,28 @@ export class UserService {
       );
     }
     throw new NotFoundException('User with this id does not exist');
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userRepository.update(userId, {
+      currentHashedRefreshToken,
+    });
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatching = await bcrypt.compare(refreshToken, user.currentHashedRefreshToken);
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.userRepository.update(userId, {
+      currentHashedRefreshToken: null,
+    });
   }
 }

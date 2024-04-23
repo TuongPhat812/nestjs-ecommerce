@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import CategoriesService from './category.service';
 import { CreateCategoryDTO, UpdateCategoryDTO } from './dtos';
-import { JwtAuthenticationGuard } from '../authentications/guards';
+import { JwtAccessTokenAuthenticationGuard } from '../authentications/guards';
 import { FindOneParams } from './types';
 
 @Controller('categories')
@@ -31,7 +31,7 @@ export default class CategoriesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAccessTokenAuthenticationGuard)
   async createCategory(@Body() category: CreateCategoryDTO) {
     return this.categoriesService.createCategory(category);
   }
