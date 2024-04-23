@@ -23,9 +23,10 @@ module.exports = {
     'scope-empty': [2, 'never'],
     'subject-empty': [2, 'never'],
     'subject-full-stop': [2, 'never', '.'],
-    'header-max-length': [2, 'always', 72],
+    'header-max-length': [2, 'always', 120],
   },
 };
+// correct example: feat(husky): keep calm and commit
 /**
  * Số 2 trong config ở trên là mức độ, bao gồm:
  * 0: Không có lỗi (off)
