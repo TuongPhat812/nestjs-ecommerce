@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "resolveJsonModule": true,
+    "outDir": "../../dist/email-subscription-app"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
+}

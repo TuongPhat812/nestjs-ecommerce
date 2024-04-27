@@ -1,8 +1,30 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/main-app/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": ["**/*.proto"],
+    "watchAssets": true
+  },
+  "projects": {
+    "main-app": {
+      "type": "application",
+      "root": "main-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/main-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/main-app/tsconfig.app.json"
+      }
+    },
+    "email-subscription-app": {
+      "type": "application",
+      "root": "email-subscription-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/email-subscription-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/email-subscription-app/tsconfig.app.json"
+      }
+    }
   }
 }
