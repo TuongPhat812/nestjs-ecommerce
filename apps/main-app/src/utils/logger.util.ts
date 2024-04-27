@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import * as winston from "winston";
+import * as winston from 'winston';
 import { winstonOptions } from '../configs/logger.config';
 
 class Logger {

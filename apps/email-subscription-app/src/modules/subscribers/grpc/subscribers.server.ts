@@ -2,7 +2,6 @@ import { Controller, UseInterceptors, ClassSerializerInterceptor, Logger } from 
 import { GrpcMethod } from '@nestjs/microservices';
 import { AddSubscriberDto } from '../dtos/add-subscriber.dto';
 
-
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export default class SubscribersGRPCController {

@@ -25,7 +25,6 @@ export default class SubscribersController implements OnModuleInit {
     await this.amqpConnection.publish<CreateSubscriberDto>('subscribers-ex', 'subscriber.created', subscriber);
     const result = await this.subscribersService.addSubscriber(subscriber);
     Logger.log(`Sent data::: ${JSON.stringify(subscriber)}`);
-    return result
+    return result;
   }
-
 }

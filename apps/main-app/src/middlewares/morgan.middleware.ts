@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import * as morgan from 'morgan'
+import * as morgan from 'morgan';
 import { TokenIndexer } from 'morgan';
 import * as chalk from 'chalk';
 import http from 'http';
